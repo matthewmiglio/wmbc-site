@@ -16,7 +16,7 @@ export default function ContactMeetingSchedule() {
             <div>
               <h3 className="font-semibold text-gray-900 text-lg">When We Meet</h3>
               <p className="text-gray-600">Monthly meetings from March to December</p>
-              <p className="text-sm text-gray-500 mt-1">Third Thursday of each month, 7:00 PM</p>
+              <p className="text-sm text-gray-500 mt-1">Third Tuesday of each month, 7:00 PM</p>
             </div>
           </div>
 

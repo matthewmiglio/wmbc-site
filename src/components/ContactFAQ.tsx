@@ -15,7 +15,7 @@ export default function ContactFAQ() {
     {
       question: "How often do you meet?",
       answer:
-        "We meet monthly from March to December at Frederik Meijer Gardens and Sculpture Park. Meetings are held on the third Thursday of each month at 7:00 PM.",
+        "We meet monthly from March to December at Frederik Meijer Gardens and Sculpture Park. Meetings are held on the third Tuesday of each month at 7:00 PM.",
     },
     {
       question: "I'm a complete beginner. Is this club for me?",

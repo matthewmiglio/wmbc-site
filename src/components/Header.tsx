@@ -12,8 +12,6 @@ export default function Header() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const shopLink = process.env.NEXT_PUBLIC_STORE_LINK || "";
-
   const navLinks = (
     <>
       <Link
@@ -31,14 +29,6 @@ export default function Header() {
           : "text-gray-600 font-bold md:font-semibold hover:text-green-800 text-center"}
       >
         Gallery
-      </Link>
-      <Link
-        href={shopLink}
-        className="text-gray-600 font-bold md:font-semibold hover:text-green-800 text-center"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        Shop
       </Link>
       <Link
         href="/calendar"

@@ -3,8 +3,6 @@ import Image from "next/image";
 import { Facebook, Instagram, Mail } from "lucide-react";
 
 export default function Footer() {
-  const shopLink = process.env.NEXT_PUBLIC_STORE_LINK || "";
-
   return (
     <footer className="bg-green-800 text-white py-16">
       <div className="container mx-auto px-6 max-w-6xl">
@@ -32,14 +30,6 @@ export default function Footer() {
               </Link>
               <Link href="/gallery" className="text-green-100 hover:text-white transition-colors">
                 Gallery
-              </Link>
-              <Link
-                href={shopLink}
-                className="text-green-100 hover:text-white transition-colors"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Shop
               </Link>
               <Link href="/calendar" className="text-green-100 hover:text-white transition-colors">
                 Calendar

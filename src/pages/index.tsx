@@ -5,7 +5,7 @@ import FacebookFeed from "../components/Facebook";
 import Footer from "../components/Footer";
 import Gallery from "../components/GalleryComponent";
 import SignUpAdCandidate2 from "../components/SignUpAdCandidate2";
-import MemberSpotlight from "../components/MemberSpotlight";
+
 import UpcomingEvents from "../components/UpcomingEvents";
 import "../styles/globals.css";
 
@@ -19,10 +19,6 @@ export default function Home() {
 
         {/* What We're About */}
         <WhatWereAbout />
-
-        {/* Member Spotlight */}
-        <MemberSpotlight />
-
 
         {/* Original Gallery and Facebook Feed */}
         <section className="container mx-auto px-4 py-12 bg-white max-w-4xl">
