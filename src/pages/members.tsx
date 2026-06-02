@@ -123,26 +123,21 @@ export default function MembersPage() {
       return;
     }
 
-    const { data, error } = await supabase
-      .from("messages")
-      .insert([
-        {
-          user_email: session.user.email,
-          content: newMessage,
-        },
-      ])
-      .select(); // Ensure we get the inserted message back
+    const resp = await fetch("/api/postMessage", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content: newMessage }),
+    });
 
-    if (error) {
-      console.error("Error sending message:", error);
+    if (!resp.ok) {
+      console.error("Error sending message:", await resp.text());
       return;
     }
 
-    if (data && data.length > 0) {
-      setMessages((prev) => [...prev, data[0]]); // Append message immediately
-      lastMessageIdRef.current = data[0].id;
-
-      // Auto-scroll to bottom after sending a message
+    const { message: inserted } = (await resp.json()) as { message: Message };
+    if (inserted) {
+      setMessages((prev) => [...prev, inserted]);
+      lastMessageIdRef.current = inserted.id;
       scrollToBottom();
     }
 

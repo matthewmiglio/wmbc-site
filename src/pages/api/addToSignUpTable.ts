@@ -1,9 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { createClient } from "@supabase/supabase-js";
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPA_URL || "no supa table url in env";
-const supabaseKey = process.env.NEXT_PUBLIC_SUPA_SECRET_KEY || "no supa key in env";
-const supabase = createClient(supabaseUrl, supabaseKey);
+import { supabaseAdmin as supabase } from "@/lib/supabaseAdmin";
 
 export default async function handler(
   req: NextApiRequest,
