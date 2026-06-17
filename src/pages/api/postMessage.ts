@@ -27,7 +27,7 @@ export default async function handler(
   }
 
   const { data, error } = await supabaseAdmin
-    .from("messages")
+    .from("wmbc_messages")
     .insert([{ user_email: session.user.email, content }])
     .select()
     .single();

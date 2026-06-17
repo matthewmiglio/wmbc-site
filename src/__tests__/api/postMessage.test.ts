@@ -68,6 +68,6 @@ describe("POST /api/postMessage", () => {
     const res = mockRes();
     await handler(req, res);
     expect((res as unknown as { statusCode: number }).statusCode).toBe(200);
-    expect(fromMock).toHaveBeenCalledWith("messages");
+    expect(fromMock).toHaveBeenCalledWith("wmbc_messages");
   });
 });

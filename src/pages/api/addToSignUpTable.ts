@@ -11,7 +11,7 @@ export default async function handler(
     try {
       // Check if email already exists
       const { data: existingUser, error: checkError } = await supabase
-        .from("SIGNUPs")
+        .from("wmbc_SIGNUPs")
         .select("email")
         .eq("email", email)
         .single();
@@ -30,7 +30,7 @@ export default async function handler(
       }
 
       // Email doesn't exist, proceed with insert
-      const { data, error } = await supabase.from("SIGNUPs").insert([
+      const { data, error } = await supabase.from("wmbc_SIGNUPs").insert([
         { fname: fname, lname: lname, email: email, phone: phone },
       ]);
 

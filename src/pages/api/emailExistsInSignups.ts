@@ -15,7 +15,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
 
     const { data, error } = await supabase
-      .from("SIGNUPs")
+      .from("wmbc_SIGNUPs")
       .select("email")
       .eq("email", email)
       .single();

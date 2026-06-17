@@ -41,7 +41,7 @@ export default function MembersPage() {
   // Fetch messages from Supabase
   const fetchMessages = async () => {
     const { data, error } = await supabase
-      .from("messages")
+      .from("wmbc_messages")
       .select("*")
       .order("created_at", { ascending: true });
 
@@ -83,7 +83,7 @@ export default function MembersPage() {
       .channel("realtime-chat")
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "messages" },
+        { event: "INSERT", schema: "public", table: "wmbc_messages" },
         (payload) => {
           setMessages((prev) => [...prev, payload.new as Message]);
           lastMessageIdRef.current = payload.new.id;
