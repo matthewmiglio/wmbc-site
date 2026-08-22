@@ -33,7 +33,9 @@ export default async function handler(
     .single();
 
   if (error) {
-    return res.status(500).json({ message: "Error inserting message", error });
+    // Logged, not returned: Supabase errors expose schema details.
+    console.error("Error inserting message:", error);
+    return res.status(500).json({ message: "Error inserting message" });
   }
 
   return res.status(200).json({ message: data });

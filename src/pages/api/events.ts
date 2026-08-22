@@ -15,7 +15,9 @@ const CALENDAR_ID = process.env.GOOGLE_CALENDAR_ID;
 const fetchEventsFromAPI = async (): Promise<Event[]> => {
 
   const res = await fetch(
-    `https://www.googleapis.com/calendar/v3/calendars/${CALENDAR_ID}/events?key=${API_KEY}`,
+    `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(
+      CALENDAR_ID ?? ""
+    )}/events?key=${encodeURIComponent(API_KEY ?? "")}`,
     { method: "GET" }
   );
 
@@ -42,6 +44,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const events = await fetchEventsFromAPI();
     res.status(200).json(events);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching events", error: error });
+    // The upstream error can name the calendar id and the API key, so it is
+    // logged server-side only.
+    console.error("Error fetching events:", error);
+    res.status(500).json({ message: "Error fetching events" });
   }
 }

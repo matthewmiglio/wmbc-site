@@ -8,42 +8,50 @@ const selectChain = {
 };
 const fromMock = vi.fn();
 
+const getServerSessionMock = vi.fn();
+vi.mock("next-auth/next", () => ({
+  getServerSession: (...a: unknown[]) => getServerSessionMock(...a),
+}));
+vi.mock("@/lib/authOptions", () => ({ authOptions: {} }));
+
 vi.mock("@/lib/supabaseAdmin", () => ({
   supabaseAdmin: { from: (...a: unknown[]) => fromMock(...a) },
 }));
 
 import handler from "@/pages/api/emailExistsInSignups";
 
+const status = (res: unknown) => (res as { statusCode: number }).statusCode;
+
 beforeEach(() => {
   vi.clearAllMocks();
   fromMock.mockImplementation(() => selectChain);
+  getServerSessionMock.mockResolvedValue({ user: { email: "me@x.com" } });
 });
 
 describe("POST /api/emailExistsInSignups", () => {
   it("rejects non-POST", async () => {
-    const req = mockReq({ method: "GET" });
     const res = mockRes();
-    await handler(req, res);
-    expect((res as unknown as { statusCode: number }).statusCode).toBe(405);
+    await handler(mockReq({ method: "GET" }), res);
+    expect(status(res)).toBe(405);
   });
 
-  it("requires email", async () => {
-    const req = mockReq({ body: {} });
+  it("returns 401 when not signed in", async () => {
+    getServerSessionMock.mockResolvedValueOnce(null);
     const res = mockRes();
-    await handler(req, res);
-    expect((res as unknown as { statusCode: number }).statusCode).toBe(400);
+    await handler(mockReq({ body: { email: "someone@x.com" } }), res);
+    expect(status(res)).toBe(401);
   });
 
-  it("returns isRegistered: true when row found", async () => {
+  it("looks up the session email and ignores the body", async () => {
     selectChain.single.mockResolvedValueOnce({
-      data: { email: "x@x.com" },
+      data: { email: "me@x.com" },
       error: null,
     });
-    const req = mockReq({ body: { email: "x@x.com" } });
     const res = mockRes();
-    await handler(req, res);
-    const body = (res as unknown as { jsonBody: { isRegistered: boolean } }).jsonBody;
-    expect(body.isRegistered).toBe(true);
+    await handler(mockReq({ body: { email: "victim@x.com" } }), res);
+    expect(selectChain.eq).toHaveBeenCalledWith("email", "me@x.com");
+    expect((res as unknown as { jsonBody: { isRegistered: boolean } }).jsonBody
+      .isRegistered).toBe(true);
   });
 
   it("returns isRegistered: false when PGRST116", async () => {
@@ -51,10 +59,9 @@ describe("POST /api/emailExistsInSignups", () => {
       data: null,
       error: { code: "PGRST116" },
     });
-    const req = mockReq({ body: { email: "missing@x.com" } });
     const res = mockRes();
-    await handler(req, res);
-    const body = (res as unknown as { jsonBody: { isRegistered: boolean } }).jsonBody;
-    expect(body.isRegistered).toBe(false);
+    await handler(mockReq({ body: {} }), res);
+    expect((res as unknown as { jsonBody: { isRegistered: boolean } }).jsonBody
+      .isRegistered).toBe(false);
   });
 });

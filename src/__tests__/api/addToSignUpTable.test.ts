@@ -6,8 +6,14 @@ const selectChain = {
   eq: vi.fn().mockReturnThis(),
   single: vi.fn(),
 };
-const insertResult = { data: [{ id: 1 }], error: null };
+const insertMock = vi.fn().mockResolvedValue({ data: [{ id: 1 }], error: null });
 const fromMock = vi.fn();
+
+const getServerSessionMock = vi.fn();
+vi.mock("next-auth/next", () => ({
+  getServerSession: (...a: unknown[]) => getServerSessionMock(...a),
+}));
+vi.mock("@/lib/authOptions", () => ({ authOptions: {} }));
 
 vi.mock("@/lib/supabaseAdmin", () => ({
   supabaseAdmin: {
@@ -17,47 +23,92 @@ vi.mock("@/lib/supabaseAdmin", () => ({
 
 import handler from "@/pages/api/addToSignUpTable";
 
+const status = (res: unknown) => (res as { statusCode: number }).statusCode;
+
 beforeEach(() => {
   vi.clearAllMocks();
   fromMock.mockImplementation(() => ({
     select: selectChain.select,
     eq: selectChain.eq,
     single: selectChain.single,
-    insert: vi.fn().mockResolvedValue(insertResult),
+    insert: insertMock,
   }));
+  getServerSessionMock.mockResolvedValue({ user: { email: "me@x.com" } });
 });
 
 describe("POST /api/addToSignUpTable", () => {
   it("rejects non-POST", async () => {
-    const req = mockReq({ method: "GET" });
     const res = mockRes();
-    await handler(req, res);
-    expect((res as unknown as { statusCode: number }).statusCode).toBe(405);
+    await handler(mockReq({ method: "GET" }), res);
+    expect(status(res)).toBe(405);
+  });
+
+  it("returns 401 when not signed in", async () => {
+    getServerSessionMock.mockResolvedValueOnce(null);
+    const res = mockRes();
+    await handler(mockReq({ body: { fname: "a", lname: "b", phone: "" } }), res);
+    expect(status(res)).toBe(401);
+  });
+
+  it("rejects a non-string name", async () => {
+    const res = mockRes();
+    await handler(
+      mockReq({ body: { fname: { $ne: null }, lname: "b", phone: "" } }),
+      res
+    );
+    expect(status(res)).toBe(400);
+  });
+
+  it("rejects an over-long name", async () => {
+    const res = mockRes();
+    await handler(
+      mockReq({ body: { fname: "a".repeat(101), lname: "b", phone: "" } }),
+      res
+    );
+    expect(status(res)).toBe(400);
   });
 
   it("returns 409 when email already exists", async () => {
     selectChain.single.mockResolvedValueOnce({
-      data: { email: "x@x.com" },
+      data: { email: "me@x.com" },
       error: null,
     });
-    const req = mockReq({
-      body: { fname: "a", lname: "b", email: "x@x.com", phone: "" },
-    });
     const res = mockRes();
-    await handler(req, res);
-    expect((res as unknown as { statusCode: number }).statusCode).toBe(409);
+    await handler(mockReq({ body: { fname: "a", lname: "b", phone: "" } }), res);
+    expect(status(res)).toBe(409);
   });
 
-  it("inserts and returns 200 when email is new", async () => {
+  it("inserts the session email, not one from the body", async () => {
     selectChain.single.mockResolvedValueOnce({
       data: null,
       error: { code: "PGRST116" },
     });
-    const req = mockReq({
-      body: { fname: "a", lname: "b", email: "new@x.com", phone: "555" },
+    const res = mockRes();
+    await handler(
+      mockReq({
+        body: { fname: "a", lname: "b", phone: "555", email: "victim@x.com" },
+      }),
+      res
+    );
+    expect(status(res)).toBe(200);
+    expect(insertMock).toHaveBeenCalledWith([
+      { fname: "a", lname: "b", email: "me@x.com", phone: "555" },
+    ]);
+  });
+
+  it("does not leak the database error to the caller", async () => {
+    selectChain.single.mockResolvedValueOnce({
+      data: null,
+      error: { code: "PGRST116" },
+    });
+    insertMock.mockResolvedValueOnce({
+      data: null,
+      error: { message: "duplicate key value violates constraint xyz" },
     });
     const res = mockRes();
-    await handler(req, res);
-    expect((res as unknown as { statusCode: number }).statusCode).toBe(200);
+    await handler(mockReq({ body: { fname: "a", lname: "b", phone: "" } }), res);
+    expect(status(res)).toBe(400);
+    expect(JSON.stringify((res as unknown as { jsonBody: unknown }).jsonBody))
+      .not.toContain("constraint");
   });
 });

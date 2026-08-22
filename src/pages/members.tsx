@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useSession } from "next-auth/react";
-import { supabase } from "@/lib/supabase";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { Button } from "@/components/ui/button";
@@ -38,18 +37,15 @@ export default function MembersPage() {
     }
   };
 
-  // Fetch messages from Supabase
+  // Fetch messages through the signed-in API route.
   const fetchMessages = async () => {
-    const { data, error } = await supabase
-      .from("wmbc_messages")
-      .select("*")
-      .order("created_at", { ascending: true });
-
-    if (error) {
-      console.error("Error fetching messages:", error);
+    const resp = await fetch("/api/messages");
+    if (!resp.ok) {
+      console.error("Error fetching messages:", resp.status);
       return;
     }
 
+    const { messages: data } = (await resp.json()) as { messages: Message[] };
     if (!data || data.length === 0) return;
 
     const lastFetchedId = data[data.length - 1].id;
@@ -75,32 +71,15 @@ export default function MembersPage() {
   };
 
   useEffect(() => {
+    if (!session) return;
+
     fetchAndScroll();
 
-    const interval = setInterval(fetchMessages, 10000); // Fetch every 10 seconds
-
-    const channel = supabase
-      .channel("realtime-chat")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "wmbc_messages" },
-        (payload) => {
-          setMessages((prev) => [...prev, payload.new as Message]);
-          lastMessageIdRef.current = payload.new.id;
-
-          // Auto-scroll if user is at the bottom
-          if (!userScrolledRef.current) {
-            scrollToBottom();
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      clearInterval(interval);
-      supabase.removeChannel(channel);
-    };
-  }, []);
+    // ponytail: a 10s poll replaces the Supabase realtime subscription, which
+    // needed the public key and public read access on the chat table.
+    const interval = setInterval(fetchMessages, 10000);
+    return () => clearInterval(interval);
+  }, [session]);
 
   // Track user scrolling
   useEffect(() => {
