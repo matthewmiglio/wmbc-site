@@ -16,8 +16,8 @@ export default function HomeHeroCandidate1() {
       />
       <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/40" />
 
-      <div className="absolute inset-0 flex flex-col justify-center items-start px-8 md:px-24 pb-12 md:pb-0 max-w-5xl">
-        <h1 className="text-6xl md:text-7xl font-bold text-white mb-6 drop-shadow-2xl leading-tight">
+      <div className="absolute inset-0 flex flex-col justify-center items-start px-6 md:px-24 pt-20 pb-12 md:py-0 max-w-5xl">
+        <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold text-white mb-6 drop-shadow-2xl leading-tight">
           West Michigan<br />Bonsai Club
         </h1>
         <p className="text-xl md:text-2xl text-white/95 max-w-2xl mb-8 drop-shadow-lg leading-relaxed">

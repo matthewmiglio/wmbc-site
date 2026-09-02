@@ -10,18 +10,25 @@ declare global {
 
 const FacebookFeed: React.FC = () => {
   const fbPageRef = useRef<HTMLDivElement>(null);
-  const [isMobile, setIsMobile] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  // Size the embed to its container so it never overflows the viewport on
+  // mobile. Clamp to Facebook's supported range [180, 500].
+  const [fbWidth, setFbWidth] = useState(500);
 
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
+    const measure = () => {
+      const w = containerRef.current?.clientWidth ?? 500;
+      setFbWidth(Math.max(180, Math.min(500, Math.floor(w))));
     };
-
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-
-    return () => window.removeEventListener('resize', checkMobile);
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
   }, []);
+
+  // Re-render the embed when its target width changes.
+  useEffect(() => {
+    if (window.FB) window.FB.XFBML.parse();
+  }, [fbWidth]);
 
   useEffect(() => {
     if (!document.getElementById("fb-root")) {
@@ -60,14 +67,14 @@ const FacebookFeed: React.FC = () => {
         </p>
       </div>
 
-      <div className="p-4">
+      <div ref={containerRef} className="p-4 max-w-full overflow-hidden">
         <div id="fb-root"></div>
         <div
           ref={fbPageRef}
-          className="fb-page"
+          className="fb-page max-w-full"
           data-href="https://www.facebook.com/West.Michigan.Bonsai.Club/"
           data-tabs="timeline"
-          data-width={isMobile ? "400" : "500"}
+          data-width={String(fbWidth)}
           data-height="500"
           data-small-header="false"
           data-adapt-container-width="true"

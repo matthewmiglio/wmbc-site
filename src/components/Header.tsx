@@ -71,8 +71,8 @@ export default function Header() {
         <div className="mx-auto w-full">
           {/* Top bar with logo + burger */}
           <div className="flex justify-between items-center w-full">
-            {/* Mobile: Logo centered, hamburger on right */}
-            <div className="md:hidden flex-1"></div>
+            {/* Mobile/tablet: Logo centered, hamburger on right */}
+            <div className="lg:hidden flex-1"></div>
 
             <Link
               href="/"
@@ -85,20 +85,20 @@ export default function Header() {
                 height={60}
                 className="transition-all duration-300 ease-in-out transform hover:scale-105"
               />
-              <div className="hidden md:block text-lg sm:text-4xl md:text-4xl lg:text-4xl xl:text-4xl 2xl:text-4xl">
+              <div className="hidden xl:block text-2xl 2xl:text-4xl whitespace-nowrap">
                 West Michigan Bonsai Club
               </div>
             </Link>
 
-            {/* Mobile menu button */}
-            <div className="md:hidden flex-1 flex justify-end">
+            {/* Mobile/tablet menu button */}
+            <div className="lg:hidden flex-1 flex justify-end">
               <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
                 {mobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
               </button>
             </div>
 
             {/* Desktop nav and buttons */}
-            <div className="hidden md:flex items-center gap-4 ml-auto">
+            <div className="hidden lg:flex items-center gap-4 ml-auto">
               <div className="flex items-center gap-5">{navLinks}</div>
               <div className="flex items-center gap-2 ml-4">
                 <BecomeMemberButton />
@@ -107,9 +107,9 @@ export default function Header() {
             </div>
           </div>
 
-          {/* Mobile dropdown */}
+          {/* Mobile/tablet dropdown */}
           {mobileMenuOpen && (
-            <div className="md:hidden mt-4 flex flex-col items-center space-y-3 text-xl">
+            <div className="lg:hidden mt-4 flex flex-col items-center space-y-3 text-xl">
               <div className="flex flex-col gap-3 items-center w-full">{navLinks}</div>
               <div className="flex flex-col gap-3 items-center w-full mt-4">
                 <BecomeMemberButton />

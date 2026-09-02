@@ -11,6 +11,7 @@
 body {
   font-family: "Poppins", sans-serif;
   padding-top: 88px; /* Account for fixed header height */
+  overflow-x: hidden; /* safety net: no third-party embed can force sideways scroll */
 }
 
 @layer base {
